@@ -1,0 +1,52 @@
+{
+  "job_posts": [
+    {
+      "id": "mc3itn19ib8ecoc9obe",
+      "title": "AI Engineer, junior",
+      "created": "2025-06-19T18:13:33.253144",
+      "deadline": "2025-07-07T18:05",
+      "description": "Natural language processing, web integration, and user experience.",
+      "requirements": [
+        {
+          "name": "Bachelor's degree"
+        },
+        {
+          "name": "Coding skills"
+        },
+        {
+          "name": "Machine Learning basics"
+        }
+      ],
+      "languages": [
+        {
+          "name": "Python",
+          "level": "basic"
+        },
+        {
+          "name": "Java",
+          "level": "basic"
+        },
+        {
+          "name": "JavaScript",
+          "level": "basic"
+        }
+      ],
+      "location": {
+        "address": "Work location address",
+        "location_type": "Hybrid"
+      },
+      "company": {
+        "name": "Company",
+        "description": "We aim to be a global leader.",
+        "benefits": [
+          "Competitive Compensation",
+          "Comprehensive medical care"
+        ],
+        "commitments": [
+          "Diversity & Inclusion",
+          "Training & Development Opportunities"
+        ]
+      }
+    }
+  ]
+}

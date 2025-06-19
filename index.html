@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Posts Manager</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>Job Posts Manager</h1>
+            <button @click="showAddForm = true" class="btn btn-primary">Add New Job Post</button>
+        </header>
+
+        <main>
+            <!-- Job Posts List -->
+            <section v-if="!showAddForm && !editingJob" class="job-posts-section">
+                <h2>Job Posts ({{ jobPosts.length }})</h2>
+                <div v-if="jobPosts.length === 0" class="empty-state">
+                    <p>No job posts found. Create your first job post!</p>
+                </div>
+                <div v-else class="job-posts-grid">
+                    <div v-for="job in jobPosts" :key="job.id" class="job-card">
+                        <div class="job-header">
+                            <h3>{{ job.title }}</h3>
+                            <div class="job-actions">
+                                <button @click="editJob(job)" class="btn btn-small btn-secondary">Edit</button>
+                                <button @click="deleteJob(job.id)" class="btn btn-small btn-danger">Delete</button>
+                            </div>
+                        </div>
+                        <div class="job-company">
+                            <strong>{{ job.company.name }}</strong>
+                        </div>
+                        <div class="job-details">
+                            <p><strong>Created:</strong> {{ formatDate(job.created) }}</p>
+                            <p><strong>Deadline:</strong> {{ formatDate(job.deadline) }}</p>
+                            <p><strong>Location:</strong> {{ job.location.address }} ({{ job.location.location_type }})</p>
+                        </div>
+                        <div class="job-description">
+                            <p>{{ truncateText(job.description, 150) }}</p>
+                        </div>
+                        <div class="job-tags">
+                            <span v-for="req in job.requirements.slice(0, 3)" :key="req.name" class="tag">
+                                {{ req.name }}
+                            </span>
+                            <span v-for="lang in job.languages.slice(0, 2)" :key="lang.name" class="tag tag-language">
+                                {{ lang.name }} ({{ lang.level }})
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Add/Edit Job Post Form -->
+            <section v-if="showAddForm || editingJob" class="form-section">
+                <h2>{{ editingJob ? 'Edit Job Post' : 'Add New Job Post' }}</h2>
+                <form @submit.prevent="saveJob" class="job-form">
+                    <div class="form-group">
+                        <label for="title">Job Title *</label>
+                        <input type="text" id="title" v-model="formData.title" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="deadline">Deadline *</label>
+                        <input type="datetime-local" id="deadline" v-model="formData.deadline" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description *</label>
+                        <textarea id="description" v-model="formData.description" rows="4" required></textarea>
+                    </div>
+
+                    <!-- Company Information -->
+                    <div class="form-section-title">
+                        <h3>Company Information</h3>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="companyName">Company Name *</label>
+                        <input type="text" id="companyName" v-model="formData.company.name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="companyDescription">Company Description *</label>
+                        <textarea id="companyDescription" v-model="formData.company.description" rows="3" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="benefits">Benefits (one per line)</label>
+                        <textarea id="benefits" v-model="benefitsText" rows="3" placeholder="Health insurance&#10;Remote work&#10;Flexible hours"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="commitments">Commitments (one per line)</label>
+                        <textarea id="commitments" v-model="commitmentsText" rows="3" placeholder="Full-time&#10;On-site work"></textarea>
+                    </div>
+
+                    <!-- Location Information -->
+                    <div class="form-section-title">
+                        <h3>Location</h3>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address">Address *</label>
+                        <input type="text" id="address" v-model="formData.location.address" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="locationType">Location Type *</label>
+                        <select id="locationType" v-model="formData.location.location_type" required>
+                            <option value="">Select location type</option>
+                            <option value="Remote">Remote</option>
+                            <option value="On-site">On-site</option>
+                            <option value="Hybrid">Hybrid</option>
+                        </select>
+                    </div>
+
+                    <!-- Requirements -->
+                    <div class="form-section-title">
+                        <h3>Job Requirements</h3>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="requirements">Requirements (one per line) *</label>
+                        <textarea id="requirements" v-model="requirementsText" rows="3" required placeholder="Bachelor's degree&#10;3+ years experience&#10;Team player"></textarea>
+                    </div>
+
+                    <!-- Languages -->
+                    <div class="form-section-title">
+                        <h3>Programming Languages</h3>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="languages">Languages (format: name,level - one per line)</label>
+                        <textarea id="languages" v-model="languagesText" rows="3" placeholder="JavaScript,Intermediate&#10;Python,Advanced&#10;React,Expert"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" @click="cancelForm" class="btn btn-secondary">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            {{ editingJob ? 'Update Job Post' : 'Create Job Post' }}
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </main>
+
+        <!-- Loading Overlay -->
+        <div v-if="loading" class="loading-overlay">
+            <div class="loading-spinner"></div>
+        </div>
+
+        <!-- Notification -->
+        <div v-if="notification.show" :class="['notification', notification.type]" @click="hideNotification">
+            {{ notification.message }}
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html> 
