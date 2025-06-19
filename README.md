@@ -1,4 +1,7 @@
-#Job posts app created by Cursor.  
+# Job posts app created by Cursor.  
+Promt: Create here on job-posts folder small and simple application with flask back-end and vue.js front-end. Functionalities: add, update, delete job post. Job post: title, created, deadline, description. Job requirements: name. Languages: name, level. Location: aadress, location type. Company: name, description, benefits, commitments. Use json file as database bearing in mind, that in future it would be changed to some real db. Use OOP and clean code principles.  
+Model: auto  
+
 
 # Job Posts Manager
 
